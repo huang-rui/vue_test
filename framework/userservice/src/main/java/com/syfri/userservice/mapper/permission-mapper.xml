@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.syfri.userservice.dao.PermissionDAO">
+	<!--1.查询条件-->
+	<sql id="SQL_CONDITION">
+		<if test="permissionid != null and permissionid != '' ">
+		 and t.permissionid = #{permissionid}
+		</if>
+		<if test="permissionname != null and permissionname != '' ">
+		 and t.permissionname = #{permissionname}
+		</if>
+		<if test="permissioninfo != null and permissioninfo != '' ">
+		 and t.permissioninfo = #{permissioninfo}
+		</if>
+		<if test="createId != null and createId != '' ">
+		 and t.create_id = #{createId}
+		</if>
+		<if test="createName != null and createName != '' ">
+		 and t.create_name = #{createName}
+		</if>
+		<if test="createTime != null and createTime != '' ">
+		 and t.create_time = #{createTime}
+		</if>
+		<if test="alterId != null and alterId != '' ">
+		 and t.alter_id = #{alterId}
+		</if>
+		<if test="alterName != null and alterName != '' ">
+		 and t.alter_name = #{alterName}
+		</if>
+		<if test="alterTime != null and alterTime != '' ">
+		 and t.alter_time = #{alterTime}
+		</if>
+		<if test="reserve1 != null and reserve1 != '' ">
+		 and t.reserve1 = #{reserve1}
+		</if>
+		<if test="reserve2 != null and reserve2 != '' ">
+		 and t.reserve2 = #{reserve2}
+		</if>
+		<if test="reserve3 != null and reserve3 != '' ">
+		 and t.reserve3 = #{reserve3}
+		</if>
+		<if test="deleteFlag != null and deleteFlag != '' ">
+		 and t.delete_flag = #{deleteFlag}
+		</if>
+	</sql>
+
+	<!--2.查询内容-->
+	<sql id="SQL_CONTENT">
+		t.permissionid permissionid,
+		t.permissionname permissionname,
+		t.permissioninfo permissioninfo,
+		t.create_id createId,
+		t.create_name createName,
+		t.create_time createTime,
+		t.alter_id alterId,
+		t.alter_name alterName,
+		t.alter_time alterTime,
+		t.reserve1 reserve1,
+		t.reserve2 reserve2,
+		t.reserve3 reserve3,
+		t.delete_flag deleteFlag
+	</sql>
+
+	<!--3.查询记录数-->
+	<select id="doSearchCount" parameterType="PermissionVO" resultType="java.lang.Integer">
+		SELECT COUNT(0) AS NUM FROM SYS_PERMISSION t WHERE 1=1 AND DELETE_FLAG = 'N'
+		<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--4.按条件查询记录-->
+	<select id="doSearchListByVO" parameterType="PermissionVO"  resultType="PermissionVO">
+		SELECT
+			<include refid="SQL_CONTENT"/>
+		FROM SYS_PERMISSION t  WHERE t.DELETE_FLAG = 'N'
+			<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--5.根据ID查询记录-->
+	<select id="doFindById" parameterType="PermissionVO"  resultType="PermissionVO">
+		SELECT
+		<include refid="SQL_CONTENT"/>
+		FROM SYS_PERMISSION t
+		WHERE t.DELETE_FLAG = 'N' AND  t.permissionid = #{value}
+	</select>
+
+	<!--6.按照VO插入-->
+	<insert  id="doInsertByVO"  parameterType="PermissionVO">
+		<selectKey resultType="String" order="BEFORE" keyProperty="permissionid">
+			SELECT SYS_GUID() AS permissionid FROM DUAL
+		</selectKey>
+		INSERT INTO SYS_PERMISSION(permissionid,permissionname,permissioninfo,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3,delete_flag)
+		VALUES(#{permissionid,jdbcType=VARCHAR},#{permissionname,jdbcType=VARCHAR},#{permissioninfo,jdbcType=VARCHAR},#{createId,jdbcType=VARCHAR},#{createName,jdbcType=VARCHAR},SYSDATE,#{alterId,jdbcType=VARCHAR},#{alterName,jdbcType=VARCHAR},SYSDATE,#{reserve1,jdbcType=VARCHAR},#{reserve2,jdbcType=VARCHAR},#{reserve3,jdbcType=DATE},'N')
+	 </insert>
+
+	<!--7.批量插入-->
+	<insert  id="doBatchInsertByList"  parameterType="java.util.List">
+		INSERT INTO SYS_PERMISSION(permissionid,permissionname,permissioninfo,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3,delete_flag)
+		SELECT SYS_GUID() permissionid, A.*
+		FROM (
+		<foreach collection="list" item="item" index="index" separator="UNION ALL" >
+		SELECT
+			#{item.permissionname,jdbcType=VARCHAR} permissionname,#{item.permissioninfo,jdbcType=VARCHAR} permissioninfo,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,#{item.alterId,jdbcType=VARCHAR} alter_id,#{item.alterName,jdbcType=VARCHAR} alter_name,SYSDATE alter_time,#{item.reserve1,jdbcType=VARCHAR} reserve1,#{item.reserve2,jdbcType=VARCHAR} reserve2,#{item.reserve3,jdbcType=DATE} reserve3,'N' delete_flag
+		FROM DUAL
+		</foreach>
+		) A
+	</insert>
+
+	<!--8.按主键逻辑删除-->
+	<update id="doDeleteById"  parameterType="String">
+		UPDATE  SYS_PERMISSION t SET t.DELETE_FLAG = 'Y'  WHERE 1=1   AND t.permissionid = #{value}
+	</update>
+
+	<!--9.按复合条件逻辑更新-->
+	<update  id="doUpdateByVO"  parameterType="PermissionVO">
+		UPDATE   SYS_PERMISSION
+		<set>
+			<if test="permissionid != null">permissionid=#{permissionid},</if>
+			<if test="permissionname != null">permissionname=#{permissionname},</if>
+			<if test="permissioninfo != null">permissioninfo=#{permissioninfo},</if>
+			<if test="createId != null">create_id=#{createId},</if>
+			<if test="createName != null">create_name=#{createName},</if>
+			<if test="createTime != null">create_time=#{createTime},</if>
+			<if test="alterId != null">alter_id=#{alterId},</if>
+			<if test="alterName != null">alter_name=#{alterName},</if>
+			<if test="alterTime != null">alter_time=#{alterTime},</if>
+			<if test="reserve1 != null">reserve1=#{reserve1},</if>
+			<if test="reserve2 != null">reserve2=#{reserve2},</if>
+			<if test="reserve3 != null">reserve3=#{reserve3},</if>
+			<if test="deleteFlag != null">delete_flag=#{deleteFlag}</if>
+		</set>
+		WHERE  permissionid = #{permissionid}
+	</update>
+
+	<!--10.批量修改-->
+	<update id="doBatchUpdateByList"  parameterType="java.util.List">
+		INSERT INTO SYS_PERMISSION(permissionid,permissionname,permissioninfo,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3,delete_flag)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			#{item.permissionname,jdbcType=VARCHAR} permissionname,#{item.permissioninfo,jdbcType=VARCHAR} permissioninfo,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,#{item.alterId,jdbcType=VARCHAR} alter_id,#{item.alterName,jdbcType=VARCHAR} alter_name,SYSDATE alter_time,#{item.reserve1,jdbcType=VARCHAR} reserve1,#{item.reserve2,jdbcType=VARCHAR} reserve2,#{item.reserve3,jdbcType=DATE} reserve3,'N' delete_flag
+		</foreach>
+		ON DUPLICATE KEY UPDATE
+			permissionid = VALUES(permissionid),
+			permissionname = VALUES(permissionname),
+			permissioninfo = VALUES(permissioninfo),
+			create_id = VALUES(create_id),
+			create_name = VALUES(create_name),
+			create_time = VALUES(create_time),
+			alter_id = VALUES(alter_id),
+			alter_name = VALUES(alter_name),
+			alter_time = VALUES(alter_time),
+			reserve1 = VALUES(reserve1),
+			reserve2 = VALUES(reserve2),
+			reserve3 = VALUES(reserve3),
+			delete_flag = VALUES(delete_flag)
+	</update>
+
+	<!--11.根据对象查询记录-->
+	<select id="doFindByVO" parameterType="PermissionVO"  resultType="PermissionVO">
+		SELECT
+		<include refid="SQL_CONTENT"/>
+		FROM SYS_PERMISSION t
+		WHERE t.DELETE_FLAG = 'N'
+		<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--12.根据资源列表查询权限-->
+	<select id="doFindPermissionByResourceList" parameterType="java.util.List" resultType="PermissionVO">
+		SELECT DISTINCT t1.permissionid,substr(t2.resourcename,2)||':'||t3.permissionname permissionname
+		FROM(
+			SELECT r.resourceid,r.resourcename,r.parentid,c.permissionid FROM SYS_RESOURCE_PERMISSION c
+			LEFT JOIN SYS_RESOURCE r ON c.resourceid = r.resourceid
+			WHERE r.delete_flag = 'N' AND c.delete_flag = 'N'
+			AND r.resourceid IN
+			<foreach collection="list" item="item" index="index" open="(" close=")" separator="," >
+				#{item.resourceid,jdbcType=VARCHAR}
+			</foreach>
+		) t1
+		LEFT JOIN (SELECT resourceid,resourcename FROM SYS_RESOURCE WHERE delete_flag = 'N') t2 ON t1.parentid = t2.resourceid
+		LEFT JOIN (SELECT permissionid,permissionname FROM SYS_PERMISSION WHERE delete_flag = 'N') t3 ON t1.permissionid = t3.permissionid
+	</select>
+
+</mapper>

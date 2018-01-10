@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.syfri.userservice.dao.RoleDAO">
+	<!--1.查询条件-->
+	<sql id="SQL_CONDITION">
+		<if test="roleid != null and roleid != '' ">
+		 and t.roleid = #{roleid}
+		</if>
+		<if test="rolename != null and rolename != '' ">
+		 and t.rolename = #{rolename}
+		</if>
+		<if test="roleinfo != null and roleinfo != '' ">
+		 and t.roleinfo = #{roleinfo}
+		</if>
+		<if test="createId != null and createId != '' ">
+		 and t.create_id = #{createId}
+		</if>
+		<if test="createName != null and createName != '' ">
+		 and t.create_name = #{createName}
+		</if>
+		<if test="createTime != null and createTime != '' ">
+		 and t.create_time = #{createTime}
+		</if>
+		<if test="alterId != null and alterId != '' ">
+		 and t.alter_id = #{alterId}
+		</if>
+		<if test="alterName != null and alterName != '' ">
+		 and t.alter_name = #{alterName}
+		</if>
+		<if test="alterTime != null and alterTime != '' ">
+		 and t.alter_time = #{alterTime}
+		</if>
+		<if test="reserve1 != null and reserve1 != '' ">
+		 and t.reserve1 = #{reserve1}
+		</if>
+		<if test="reserve2 != null and reserve2 != '' ">
+		 and t.reserve2 = #{reserve2}
+		</if>
+		<if test="reserve3 != null and reserve3 != '' ">
+		 and t.reserve3 = #{reserve3}
+		</if>
+		<if test="deleteFlag != null and deleteFlag != '' ">
+		 and t.delete_flag = #{deleteFlag}
+		</if>
+	</sql>
+
+	<!--2.查询内容-->
+	<sql id="SQL_CONTENT">
+		t.roleid roleid,
+		t.rolename rolename,
+		t.roleinfo roleinfo,
+		t.create_id createId,
+		t.create_name createName,
+		t.create_time createTime,
+		t.alter_id alterId,
+		t.alter_name alterName,
+		t.alter_time alterTime,
+		t.reserve1 reserve1,
+		t.reserve2 reserve2,
+		t.reserve3 reserve3,
+		t.delete_flag deleteFlag
+	</sql>
+
+	<!--3.查询记录数-->
+	<select id="doSearchCount" parameterType="RoleVO" resultType="java.lang.Integer">
+		SELECT COUNT(0) AS NUM FROM SYS_ROLE t WHERE 1=1 AND DELETE_FLAG = 'N'
+		<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--4.按条件查询记录-->
+	<select id="doSearchListByVO" parameterType="RoleVO"  resultType="RoleVO"> 
+		SELECT 
+			<include refid="SQL_CONTENT"/>
+		FROM SYS_ROLE t  WHERE t.DELETE_FLAG = 'N' 
+			<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--5.根据ID查询记录-->
+	<select id="doFindById" parameterType="RoleVO"  resultType="RoleVO">  
+		SELECT 
+		<include refid="SQL_CONTENT"/>
+		FROM SYS_ROLE t 
+		WHERE t.DELETE_FLAG = 'N' AND  t.roleid = #{value} 
+	</select>
+
+	<!--6.按照VO插入-->
+	<insert  id="doInsertByVO"  parameterType="RoleVO"> 
+		<selectKey resultType="String" order="BEFORE" keyProperty="roleid">
+			SELECT SYS_GUID() AS roleid FROM DUAL
+		</selectKey>
+		INSERT INTO SYS_ROLE(roleid,rolename,roleinfo,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3,delete_flag)
+		VALUES(#{roleid,jdbcType=VARCHAR},#{rolename,jdbcType=VARCHAR},#{roleinfo,jdbcType=VARCHAR},#{createId,jdbcType=VARCHAR},#{createName,jdbcType=VARCHAR},SYSDATE,#{alterId,jdbcType=VARCHAR},#{alterName,jdbcType=VARCHAR},SYSDATE,#{reserve1,jdbcType=VARCHAR},#{reserve2,jdbcType=VARCHAR},#{reserve3,jdbcType=DATE},'N')
+	 </insert>
+
+	<!--7.批量插入-->
+	<insert  id="doBatchInsertByList"  parameterType="java.util.List"> 
+		INSERT INTO SYS_ROLE(roleid,rolename,roleinfo,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3,delete_flag)
+		SELECT SYS_GUID() roleid, A.* 
+		FROM ( 
+		<foreach collection="list" item="item" index="index" separator="UNION ALL" >
+		SELECT
+			#{item.rolename,jdbcType=VARCHAR} rolename,#{item.roleinfo,jdbcType=VARCHAR} roleinfo,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,#{item.alterId,jdbcType=VARCHAR} alter_id,#{item.alterName,jdbcType=VARCHAR} alter_name,SYSDATE alter_time,#{item.reserve1,jdbcType=VARCHAR} reserve1,#{item.reserve2,jdbcType=VARCHAR} reserve2,#{item.reserve3,jdbcType=DATE} reserve3,'N' delete_flag
+		FROM DUAL
+		</foreach>
+		) A
+	</insert>
+
+	<!--8.按主键逻辑删除-->
+	<update id="doDeleteById"  parameterType="String"> 
+		UPDATE  SYS_ROLE t SET t.DELETE_FLAG = 'Y'  WHERE 1=1   AND t.roleid = #{value} 
+	</update>
+
+	<!--9.按复合条件逻辑更新-->
+	<update  id="doUpdateByVO"  parameterType="RoleVO">
+		UPDATE   SYS_ROLE  
+		<set>
+			<if test="roleid != null">roleid=#{roleid},</if>
+			<if test="rolename != null">rolename=#{rolename},</if>
+			<if test="roleinfo != null || roleinfo == null">roleinfo=#{roleinfo},</if>
+			<if test="createId != null">create_id=#{createId},</if>
+			<if test="createName != null">create_name=#{createName},</if>
+			<if test="createTime != null">create_time=#{createTime},</if>
+			<if test="alterId != null">alter_id=#{alterId},</if>
+			<if test="alterName != null">alter_name=#{alterName},</if>
+			<if test="alterTime != null">alter_time=#{alterTime},</if>
+			<if test="reserve1 != null">reserve1=#{reserve1},</if>
+			<if test="reserve2 != null">reserve2=#{reserve2},</if>
+			<if test="reserve3 != null">reserve3=#{reserve3},</if>
+			<if test="deleteFlag != null">delete_flag=#{deleteFlag}</if>
+		</set>
+		WHERE  roleid = #{roleid}
+	</update>
+
+
+	<!--10.批量修改-->
+	<update id="doBatchUpdateByList"  parameterType="java.util.List">
+		INSERT INTO SYS_ROLE(roleid,rolename,roleinfo,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3,delete_flag)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			#{item.rolename,jdbcType=VARCHAR} rolename,#{item.roleinfo,jdbcType=VARCHAR} roleinfo,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,#{item.alterId,jdbcType=VARCHAR} alter_id,#{item.alterName,jdbcType=VARCHAR} alter_name,SYSDATE alter_time,#{item.reserve1,jdbcType=VARCHAR} reserve1,#{item.reserve2,jdbcType=VARCHAR} reserve2,#{item.reserve3,jdbcType=DATE} reserve3,'N' delete_flag
+		</foreach>
+		ON DUPLICATE KEY UPDATE   
+			roleid = VALUES(roleid),
+			rolename = VALUES(rolename),
+			roleinfo = VALUES(roleinfo),
+			create_id = VALUES(create_id),
+			create_name = VALUES(create_name),
+			create_time = VALUES(create_time),
+			alter_id = VALUES(alter_id),
+			alter_name = VALUES(alter_name),
+			alter_time = VALUES(alter_time),
+			reserve1 = VALUES(reserve1),
+			reserve2 = VALUES(reserve2),
+			reserve3 = VALUES(reserve3),
+			delete_flag = VALUES(delete_flag)
+	</update>
+
+	<!--11.根据对象查询记录-->
+	<select id="doFindByVO" parameterType="RoleVO"  resultType="RoleVO">  
+		SELECT 
+		<include refid="SQL_CONTENT"/>
+		FROM SYS_ROLE t 
+		WHERE t.DELETE_FLAG = 'N' 
+		<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--12.根据用户获取用户的角色-->
+	<select id="doFindRoleByUserid" parameterType="String" resultType="RoleVO">
+		SELECT
+		<include refid="SQL_CONTENT"/>
+			FROM SYS_ACCOUNT_ROLE r LEFT JOIN SYS_ROLE t ON r.roleid = t.roleid where userid = #{pkid}
+	</select>
+
+	<!--13.根据角色查询角色及权限-->
+	<resultMap id="RoleResourceMap" type="com.syfri.userservice.model.RoleVO">
+		<id property="roleid" column="roleid"/>
+		<result property="rolename" column="rolename"/>
+		<result property="roleinfo" column="roleinfo"/>
+		<result property="createName" column="create_name"/>
+		<result property="createTime" column="create_time"/>
+		<result property="alterName" column="alter_name"/>
+		<result property="alterTime" column="alter_time"/>
+		<collection property="resources" ofType="com.syfri.userservice.model.ResourceVO">
+			<id property="resourceid" column="resourceid"/>
+			<result property="resourcename" column="resourcename"/>
+			<result property="resourceinfo" column="resourceinfo"/>
+			<!--<collection property="permissions" ofType="com.syfri.userservice.model.PermissionVO">-->
+				<!--<id property="permissionid" column="permissionid"/>-->
+				<!--<result property="permissionname" column="permissionname"/>-->
+			<!--</collection>-->
+		</collection>
+	</resultMap>
+	<select id="doFindRoleResources" parameterType="RoleVO"  resultMap="RoleResourceMap">
+		SELECT
+		<include refid="SQL_CONTENT"/>
+		,r.resourceid
+		,r.resourcename
+		,r.resourceinfo
+		FROM SYS_ROLE t
+		LEFT JOIN (SELECT c.roleid,r.resourceid,r.resourcename,r.resourceinfo from SYS_ROLE_RESOURCE c
+						INNER JOIN SYS_RESOURCE r ON r.resourceid = c.resourceid
+						WHERE (r.DELETE_FLAG = 'N' OR r.DELETE_FLAG IS NULL)
+				  ) r
+		ON t.roleid = r.roleid
+
+		WHERE t.DELETE_FLAG = 'N'
+		<include refid="SQL_CONDITION"/>
+		ORDER BY t.create_time DESC
+	</select>
+
+	<!--14.新增角色时批量插入用权限（向中间表中）-->
+	<insert  id="doInsertRoleResourcesBatch"  parameterType="java.util.List">
+		INSERT INTO SYS_ROLE_RESOURCE(pkid,roleid,resourceid,create_id,create_name,create_time,delete_flag)
+		SELECT SYS_GUID() pkid, A.*
+		FROM (
+		<foreach collection="list" item="item" index="index" separator="UNION ALL" >
+			SELECT
+			#{item.roleid,jdbcType=VARCHAR} roleid,#{item.resourceid,jdbcType=VARCHAR} resourceid,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,'N' delete_flag
+			FROM DUAL
+		</foreach>
+		) A
+	</insert>
+
+	<!--15.修改角色时先删除角色的权限（中间表）-->
+	<delete id="doDeleteRoleResources" parameterType="String">
+		DELETE FROM SYS_ROLE_RESOURCE WHERE ROLEID = #{value}
+	</delete>
+
+	<!--16.删除用户时删除用户角色-->
+	<update id="doDeleteRoleResourcesBatch"  parameterType="String">
+		UPDATE SYS_ROLE_RESOURCE t SET t.DELETE_FLAG = 'Y' WHERE 1=1 AND t.ROLEID = #{value}
+	</update>
+</mapper>

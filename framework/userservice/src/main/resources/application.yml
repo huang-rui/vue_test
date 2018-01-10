@@ -1,0 +1,66 @@
+#server
+server:
+  port: 8004
+#------------------------------------------------------------
+#spring
+spring:
+  druid:
+    #配置druid连接池
+    datasource:
+      type: com.alibaba.druid.pool.DruidDataSource
+      driverClassName: oracle.jdbc.OracleDriver
+      url: jdbc:oracle:thin:@localhost:1521/orcl
+      username: test
+      password: Test123
+      initialSize: 5
+      minIdle: 5
+      maxActive: 20
+      maxWait: 60000
+      timeBetweenEvictionRunsMillis: 60000
+      minEvictableIdleTimeMillis: 300000
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      poolPreparedStatements: true
+      maxPoolPreparedStatementPerConnectionSize: 20
+#      filters: stat,wall,slf4j
+      connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+
+  mybatis:
+    mapperLocations: classpath*:com/syfri/userservice/mapper/*-mapper.xml
+    typeAliasesPackage: com.syfri.userservice
+    basePackage: com.syfri.userservice.dao
+    configuration:
+      cacheEnabled: false
+      lazyLoadingEnabled: false
+  thymeleaf:
+    cache: false
+    mode: LEGACYHTML5
+    prefix: classpath:/templates/
+    suffix: .html
+#------------------------------------------------------------
+#pagehelper分页插件设置
+pagehelper:
+  helper-dialect: oracle
+  reasonable: true
+  support-methods-arguments: true
+  row-bounds-with-count: true
+  auto-dialect: true
+#------------------------------------------------------------
+logging:
+  level: debug
+#------------------------------------------------------------
+#swagger:
+#  title: springboot
+#  description: springboot swagger
+#  version: 1.0
+#  license: 111
+#  license-url: https://www.apache.org/licenses/LICENSE-2.0.html
+#  terms-of-service-url: https://github.com/dyc87112/spring-boot-starter-swagger
+#  contact:
+#    email: xxx@syfri.cn
+#    name: lx
+#    url: http://blog.didispace.com
+#  base-package: com.syfri
+#------------------------------------------------------------

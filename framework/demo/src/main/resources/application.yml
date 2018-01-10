@@ -1,0 +1,35 @@
+server:
+  port: 8002
+dubbo:
+  consumer:
+    applicationName: test-consumer
+    registryProtocol: zookeeper
+    registryAddress: 127.0.0.1:2181,127.0.0.1:2182,127.0.0.1:2183
+    annotationPackage: com.syfri.demo.service
+    refrenceRetries: 0
+    refrenceTimeout: 2000
+    monitorProtocol: registry
+spring:
+  datasource:
+    #type: com.alibaba.druid.pool.DruidDataSource
+    #driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@localhost:1521/orcl
+    username: scott
+    password: Lx123456
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect
+    jackson:
+      serialization:
+        indent_output: true
+  themeleaf:
+    prefix: /WEB-INF/views
+    suffix: .html
+    mode: HTML5
+    encoding: UTF-8
+    content-type: text/html
+    cache: false

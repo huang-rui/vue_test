@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.syfri.userservice.dao.UserDAO">
+	<!--1.查询条件-->
+	<sql id="SQL_CONDITION">
+		<if test="pkid != null and pkid != '' ">
+		 and t.pkid = #{pkid}
+		</if>
+		<if test="userid != null and userid != '' ">
+		 and t.userid = #{userid}
+		</if>
+		<if test="realname != null and realname != '' ">
+		 and t.realname = #{realname}
+		</if>
+		<if test="birth != null and birth != '' ">
+		 and t.birth = #{birth}
+		</if>
+		<if test="sex != null and sex != '' ">
+		 and t.sex = #{sex}
+		</if>
+		<if test="deptid != null and deptid != '' ">
+		 and t.deptid = #{deptid}
+		</if>
+		<if test="position != null and position != '' ">
+		 and t.position = #{position}
+		</if>
+		<if test="phone != null and phone != '' ">
+		 and t.phone = #{phone}
+		</if>
+		<if test="mobile != null and mobile != '' ">
+		 and t.mobile = #{mobile}
+		</if>
+		<if test="email != null and email != '' ">
+		 and t.email = #{email}
+		</if>
+		<if test="deleteFlag != null and deleteFlag != '' ">
+		 and t.delete_flag = #{deleteFlag}
+		</if>
+		<if test="createId != null and createId != '' ">
+		 and t.create_id = #{createId}
+		</if>
+		<if test="createName != null and createName != '' ">
+		 and t.create_name = #{createName}
+		</if>
+		<if test="createTime != null and createTime != '' ">
+		 and t.create_time = #{createTime}
+		</if>
+		<if test="alterId != null and alterId != '' ">
+		 and t.alter_id = #{alterId}
+		</if>
+		<if test="alterName != null and alterName != '' ">
+		 and t.alter_name = #{alterName}
+		</if>
+		<if test="alterTime != null and alterTime != '' ">
+		 and t.alter_time = #{alterTime}
+		</if>
+		<if test="reserve1 != null and reserve1 != '' ">
+		 and t.reserve1 = #{reserve1}
+		</if>
+		<if test="reserve2 != null and reserve2 != '' ">
+		 and t.reserve2 = #{reserve2}
+		</if>
+		<if test="reserve3 != null and reserve3 != '' ">
+		 and t.reserve3 = #{reserve3}
+		</if>
+	</sql>
+
+	<!--2.查询内容-->
+	<sql id="SQL_CONTENT">
+		t.pkid pkid,
+		t.userid userid,
+		t.realname realname,
+		TO_CHAR(t.birth,'yyyy-MM-dd HH24:mi:ss') birth,
+		t.sex sex,
+		t.deptid deptid,
+		t.position position,
+		t.phone phone,
+		t.mobile mobile,
+		t.email email,
+		t.delete_flag deleteFlag,
+		t.create_id createId,
+		t.create_name createName,
+		TO_CHAR(t.create_time,'yyyy-MM-dd HH24:mi:ss') createTime,
+		t.alter_id alterId,
+		t.alter_name alterName,
+		TO_CHAR(t.alter_time,'yyyy-MM-dd HH24:mi:ss') alterTime,
+		t.reserve1 reserve1,
+		t.reserve2 reserve2,
+		TO_CHAR(t.reserve3,'yyyy-MM-dd HH24:mi:ss') reserve3
+	</sql>
+
+	<!--3.查询记录数-->
+	<select id="doSearchCount" parameterType="UserVO" resultType="java.lang.Integer">
+		SELECT COUNT(0) AS NUM FROM SYS_USER t WHERE 1=1 AND DELETE_FLAG = 'N'
+		<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--4.按条件查询记录-->
+	<select id="doSearchListByVO" parameterType="UserVO"  resultType="UserVO"> 
+		SELECT 
+			<include refid="SQL_CONTENT"/>
+		FROM SYS_USER t  WHERE t.DELETE_FLAG = 'N' 
+			<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--5.根据ID查询记录-->
+	<select id="doFindById" parameterType="UserVO"  resultType="UserVO">  
+		SELECT 
+		<include refid="SQL_CONTENT"/>
+		FROM SYS_USER t 
+		WHERE t.DELETE_FLAG = 'N' AND  t.PKID = #{value} 
+	</select>
+
+	<!--6.按照VO插入-->
+	<insert  id="doInsertByVO"  parameterType="UserVO"> 
+		<selectKey resultType="String" order="BEFORE" keyProperty="pkid">
+			SELECT SYS_GUID() AS pkid FROM DUAL
+		</selectKey>
+		INSERT INTO SYS_USER(pkid,userid,realname,birth,sex,deptid,position,phone,mobile,email,delete_flag,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3)
+		VALUES(#{pkid,jdbcType=VARCHAR},#{userid,jdbcType=VARCHAR},#{realname,jdbcType=VARCHAR},#{birth,jdbcType=DATE},#{sex,jdbcType=VARCHAR},#{deptid,jdbcType=VARCHAR},#{position,jdbcType=VARCHAR},#{phone,jdbcType=VARCHAR},#{mobile,jdbcType=VARCHAR},#{email,jdbcType=VARCHAR},'N',#{createId,jdbcType=VARCHAR},#{createName,jdbcType=VARCHAR},SYSDATE,#{alterId,jdbcType=VARCHAR},#{alterName,jdbcType=VARCHAR},SYSDATE,#{reserve1,jdbcType=VARCHAR},#{reserve2,jdbcType=VARCHAR},#{reserve3,jdbcType=DATE})
+	 </insert>
+
+	<!--7.批量插入-->
+	<insert  id="doBatchInsertByList"  parameterType="java.util.List"> 
+		INSERT INTO SYS_USER(pkid,userid,realname,birth,sex,deptid,position,phone,mobile,email,delete_flag,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3)
+		SELECT SYS_GUID() pkid, A.* 
+		FROM ( 
+		<foreach collection="list" item="item" index="index" separator="UNION ALL" >
+		SELECT
+			#{item.userid,jdbcType=VARCHAR} userid,#{item.realname,jdbcType=VARCHAR} realname,#{item.birth,jdbcType=DATE} birth,#{item.sex,jdbcType=VARCHAR} sex,#{item.deptid,jdbcType=VARCHAR} deptid,#{item.position,jdbcType=VARCHAR} position,#{item.phone,jdbcType=VARCHAR} phone,#{item.mobile,jdbcType=VARCHAR} mobile,#{item.email,jdbcType=VARCHAR} email,'N' delete_flag,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,#{item.alterId,jdbcType=VARCHAR} alter_id,#{item.alterName,jdbcType=VARCHAR} alter_name,SYSDATE alter_time,#{item.reserve1,jdbcType=VARCHAR} reserve1,#{item.reserve2,jdbcType=VARCHAR} reserve2,#{item.reserve3,jdbcType=DATE} reserve3
+		FROM DUAL
+		</foreach>
+		) A
+	</insert>
+
+	<!--8.按主键逻辑删除-->
+	<update id="doDeleteById"  parameterType="String"> 
+		UPDATE  SYS_USER t SET t.DELETE_FLAG = 'Y'  WHERE 1=1   AND t.PKID = #{value} 
+	</update>
+
+	<!--9.按复合条件逻辑更新-->
+	<update  id="doUpdateByVO"  parameterType="UserVO"> 
+		UPDATE   SYS_USER  
+		<set>
+			<if test="pkid != null">pkid=#{pkid},</if>
+			<if test="userid != null">userid=#{userid},</if>
+			<if test="realname != null">realname=#{realname},</if>
+			<if test="birth != null">birth=TO_DATE(#{birth},'yyyy-MM-dd HH24:mi:ss'),</if>
+			<if test="sex != null">sex=#{sex},</if>
+			<if test="deptid != null">deptid=#{deptid},</if>
+			<if test="position != null">position=#{position},</if>
+			<if test="phone != null">phone=#{phone},</if>
+			<if test="mobile != null">mobile=#{mobile},</if>
+			<if test="email != null">email=#{email},</if>
+			<if test="deleteFlag != null">delete_flag='N',</if>
+			<if test="createId != null">create_id=#{createId},</if>
+			<if test="createName != null">create_name=#{createName},</if>
+			<if test="createTime != null">create_time=TO_DATE(#{createTime},'yyyy-MM-dd HH24:mi:ss'),</if>
+			<if test="alterId != null">alter_id=#{alterId},</if>
+			<if test="alterName != null">alter_name=#{alterName},</if>
+			<if test="alterTime != null">alter_time=TO_DATE(TO_CHAR(SYSDATE,'yyyy-MM-dd HH24:mi:ss'),'yyyy-MM-dd HH24:mi:ss'),</if>
+			<if test="reserve1 != null">reserve1=#{reserve1},</if>
+			<if test="reserve2 != null">reserve2=#{reserve2},</if>
+			<if test="reserve3 != null">reserve3=TO_DATE(#{reserve3},'yyyy-MM-dd HH24:mi:ss')</if>
+		</set>
+		WHERE  PKID = #{pkid}
+	</update>
+
+	<!--10.批量修改-->
+	<update id="doBatchUpdateByList"  parameterType="java.util.List">
+		INSERT INTO SYS_USER(pkid,userid,realname,birth,sex,deptid,position,phone,mobile,email,delete_flag,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			#{item.userid,jdbcType=VARCHAR} userid,#{item.realname,jdbcType=VARCHAR} realname,#{item.birth,jdbcType=DATE} birth,#{item.sex,jdbcType=VARCHAR} sex,#{item.deptid,jdbcType=VARCHAR} deptid,#{item.position,jdbcType=VARCHAR} position,#{item.phone,jdbcType=VARCHAR} phone,#{item.mobile,jdbcType=VARCHAR} mobile,#{item.email,jdbcType=VARCHAR} email,'N' delete_flag,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,#{item.alterId,jdbcType=VARCHAR} alter_id,#{item.alterName,jdbcType=VARCHAR} alter_name,SYSDATE alter_time,#{item.reserve1,jdbcType=VARCHAR} reserve1,#{item.reserve2,jdbcType=VARCHAR} reserve2,#{item.reserve3,jdbcType=DATE} reserve3
+		</foreach>
+		ON DUPLICATE KEY UPDATE   
+			pkid = VALUES(pkid),
+			userid = VALUES(userid),
+			realname = VALUES(realname),
+			birth = VALUES(birth),
+			sex = VALUES(sex),
+			deptid = VALUES(deptid),
+			position = VALUES(position),
+			phone = VALUES(phone),
+			mobile = VALUES(mobile),
+			email = VALUES(email),
+			delete_flag = VALUES(delete_flag),
+			create_id = VALUES(create_id),
+			create_name = VALUES(create_name),
+			create_time = VALUES(create_time),
+			alter_id = VALUES(alter_id),
+			alter_name = VALUES(alter_name),
+			alter_time = VALUES(alter_time),
+			reserve1 = VALUES(reserve1),
+			reserve2 = VALUES(reserve2),
+			reserve3 = VALUES(reserve3)
+	</update>
+
+	<!--11.根据对象查询记录-->
+	<select id="doFindByVO" parameterType="UserVO"  resultType="UserVO">  
+		SELECT 
+		<include refid="SQL_CONTENT"/>
+		FROM SYS_USER t 
+		WHERE t.DELETE_FLAG = 'N' 
+		<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!-- 以上的方法均查询的是User单表，以下的方法是和Role表多表查询 -->
+
+	<!--12.根据用户查询用户和其角色-->
+	<resultMap id="UserRolesMap" type="com.syfri.userservice.model.UserVO">
+		<id property="pkid" column="pkid"/>
+		<result property="userid" column="userid"/>
+		<result property="realname" column="realname"/>
+		<result property="birth" column="birth"/>
+		<result property="sex" column="sex"/>
+		<result property="deptid" column="deptid"/>
+		<result property="position" column="position"/>
+		<result property="phone" column="phone"/>
+		<result property="mobile" column="mobile"/>
+		<result property="email" column="email"/>
+		<result property="createName" column="create_name"/>
+		<result property="createTime" column="create_time"/>
+		<result property="alterName" column="alter_name"/>
+		<result property="alterTime" column="alter_time"/>
+		<association property="accountVO" javaType="AccountVO">
+			<id property="userid" column="userid"></id>
+			<result property="username" column="username"/>
+			<result property="password" column="password"/>
+			<result property="salt" column="salt"/>
+		</association>
+		<collection property="roles" ofType="com.syfri.userservice.model.RoleVO">
+			<id property="roleid" column="roleid"></id>
+			<result property="rolename" column="rolename"/>
+		</collection>
+	</resultMap>
+
+	<select id="doFindUserRoles" parameterType="UserVO"  resultMap="UserRolesMap">
+		SELECT
+		<include refid="SQL_CONTENT"/>
+		,a.username
+		,a.password
+		,a.salt
+		,r.roleid
+		,r.rolename
+		FROM SYS_USER t
+		INNER JOIN SYS_ACCOUNT a ON t.userid = a.userid
+		LEFT JOIN SYS_ACCOUNT_ROLE m ON t.pkid = m.userid
+		LEFT JOIN SYS_ROLE r ON r.roleid = m.roleid
+		WHERE t.DELETE_FLAG = 'N'
+		AND (r.DELETE_FLAG = 'N' OR r.DELETE_FLAG IS NULL)
+		<include refid="SQL_CONDITION"/>
+		ORDER BY t.create_time DESC
+	</select>
+
+</mapper>

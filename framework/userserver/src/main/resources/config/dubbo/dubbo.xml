@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+               xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!-- 提供方应用信息 -->
+    <dubbo:application name="${dubbo.application.name}"/>
+
+    <!-- 注册中心暴露的服务地址 -->
+    <dubbo:registry protocol="${dubbo.registry.protocol}" address="${dubbo.registry.address}"/>
+
+    <!-- 协议名称、协议端口 -->
+    <dubbo:protocol name="${dubbo.protocol.name}" port="${dubbo.protocol.port}"/>
+
+    <!-- 对外暴露的接口及实现类 -->
+    <dubbo:service interface="com.syfri.userserver.service.UserService" ref="userService" retries="0" timeout="6000"/>
+
+    <!--<dubbo:monitor protocol="registry"/>-->
+</beans>

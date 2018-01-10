@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ehcache name="ehcache">
+    <diskStore path="java.io.tmpdir"/>
+    <!--
+        name:缓存名称
+        maxElementsInMemory:缓存最大数
+        maxElementsOnDisk:磁盘最大缓存个数
+        eternal:是否永久有效，如果设置了，timeout无效
+        timeToIdleSeconds:设置对象在失效前的允许闲置时间，单位s
+        timeToLiveSeconds:设置对象在失效前的允许存活时间，单位s，默认是0存活时间无穷大
+        diskPersistent:是否缓存虚拟机重启期数
+        diskSpoolBufferSizeMB:设置磁盘缓存的缓存区大小
+        diskExpiryThreadIntervalSeconds:磁盘失效线程运行时间间隔，默认120s
+        clearOnFlush:内存数量最大时是否清除
+        memoryStoreEvictionPolicy:当达到maxElementsInMemory限制时，Ehcache将会根据指定的策略去清理内存；三种策略FIFO。LFU，LRU（默认）
+    -->
+    <defaultCache
+            maxElementsInMemory="10000"
+            eternal="false"
+            timeToIdleSeconds="120"
+            timeToLiveSeconds="120"
+            overflowToDisk="false"
+            diskPersistent="false"
+            diskExpiryThreadIntervalSeconds="120"
+    />
+    <cache name="tenMinutes"
+           maxElementsInMemory="2000"
+           eternal="false"
+           timeToIdleSeconds="600"
+           timeToLiveSeconds="600"
+           overflowToDisk="false"
+           statistics="true">
+    </cache>
+
+    <!-- 密码输入错误5次锁定10分钟 -->
+    <cache name="passwordRetryCache"
+           maxEntriesLocalHeap="2000"
+           eternal="false"
+           timeToIdleSeconds="600"
+           timeToLiveSeconds="600"
+           overflowToDisk="false"
+           statistics="true">
+    </cache>
+</ehcache>

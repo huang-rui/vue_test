@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.syfri.userservice.dao.ResourceDAO">
+	<!--1.查询条件-->
+	<sql id="SQL_CONDITION">
+		<if test="resourceid != null and resourceid != '' ">
+		 and t.resourceid = #{resourceid}
+		</if>
+		<if test="resourcename != null and resourcename != '' ">
+		 and t.resourcename = #{resourcename}
+		</if>
+		<if test="resourceinfo != null and resourceinfo != '' ">
+		 and t.resourceinfo = #{resourceinfo}
+		</if>
+		<if test="parentid != null and parentid != '' ">
+		 and t.parentid = #{parentid}
+		</if>
+		<if test="seqno != null and seqno != '' ">
+		 and t.seqno = #{seqno}
+		</if>
+		<if test="icon != null and icon != '' ">
+		 and t.icon = #{icon}
+		</if>
+		<if test="type != null and type != '' ">
+		 and t.type = #{type}
+		</if>
+		<if test="deleteFlag != null and deleteFlag != '' ">
+		 and t.delete_flag = #{deleteFlag}
+		</if>
+		<if test="createId != null and createId != '' ">
+		 and t.create_id = #{createId}
+		</if>
+		<if test="createName != null and createName != '' ">
+		 and t.create_name = #{createName}
+		</if>
+		<if test="createTime != null and createTime != '' ">
+		 and t.create_time = #{createTime}
+		</if>
+		<if test="alterId != null and alterId != '' ">
+		 and t.alter_id = #{alterId}
+		</if>
+		<if test="alterName != null and alterName != '' ">
+		 and t.alter_name = #{alterName}
+		</if>
+		<if test="alterTime != null and alterTime != '' ">
+		 and t.alter_time = #{alterTime}
+		</if>
+		<if test="reserve1 != null and reserve1 != '' ">
+		 and t.reserve1 = #{reserve1}
+		</if>
+		<if test="reserve2 != null and reserve2 != '' ">
+		 and t.reserve2 = #{reserve2}
+		</if>
+		<if test="reserve3 != null and reserve3 != '' ">
+		 and t.reserve3 = #{reserve3}
+		</if>
+	</sql>
+
+	<!--2.查询内容-->
+	<sql id="SQL_CONTENT">
+		t.resourceid resourceid,
+		t.resourcename resourcename,
+		t.resourceinfo resourceinfo,
+		t.parentid parentid,
+		t.seqno seqno,
+		t.icon icon,
+		t.type type,
+		t.delete_flag deleteFlag,
+		t.create_id createId,
+		t.create_name createName,
+		TO_CHAR(t.create_time,'yyyy-MM-dd HH24:mi:ss') createTime,
+		t.alter_id alterId,
+		t.alter_name alterName,
+		TO_CHAR(t.alter_time,'yyyy-MM-dd HH24:mi:ss') alterTime,
+		t.reserve1 reserve1,
+		t.reserve2 reserve2,
+		TO_CHAR(t.reserve3,'yyyy-MM-dd HH24:mi:ss') reserve3
+	</sql>
+
+	<!--3.查询记录数-->
+	<select id="doSearchCount" parameterType="ResourceVO" resultType="java.lang.Integer">
+		SELECT COUNT(0) AS NUM FROM SYS_RESOURCE t WHERE 1=1 AND DELETE_FLAG = 'N'
+		<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--4.按条件查询记录-->
+	<select id="doSearchListByVO" parameterType="ResourceVO"  resultType="ResourceVO"> 
+		SELECT 
+			<include refid="SQL_CONTENT"/>
+		FROM SYS_RESOURCE t  WHERE t.DELETE_FLAG = 'N' 
+			<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--5.根据ID查询记录-->
+	<select id="doFindById" parameterType="ResourceVO"  resultType="ResourceVO">  
+		SELECT 
+		<include refid="SQL_CONTENT"/>
+		FROM SYS_RESOURCE t 
+		WHERE t.DELETE_FLAG = 'N' AND  t.RESOURCEID = #{value}
+	</select>
+
+	<!--6.按照VO插入-->
+	<insert  id="doInsertByVO"  parameterType="ResourceVO"> 
+		<selectKey resultType="String" order="BEFORE" keyProperty="resourceid">
+			SELECT SYS_GUID() AS RESOURCEID FROM DUAL
+		</selectKey>
+		INSERT INTO SYS_RESOURCE(resourceid,resourcename,resourceinfo,parentid,seqno,icon,type,delete_flag,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3)
+		VALUES(#{resourceid,jdbcType=VARCHAR},#{resourcename,jdbcType=VARCHAR},#{resourceinfo,jdbcType=VARCHAR},#{parentid,jdbcType=VARCHAR},#{seqno,jdbcType=DOUBLE},#{icon,jdbcType=VARCHAR},#{type,jdbcType=VARCHAR},'N',#{createId,jdbcType=VARCHAR},#{createName,jdbcType=VARCHAR},SYSDATE,#{alterId,jdbcType=VARCHAR},#{alterName,jdbcType=VARCHAR},SYSDATE,#{reserve1,jdbcType=VARCHAR},#{reserve2,jdbcType=VARCHAR},#{reserve3,jdbcType=DATE})
+	 </insert>
+
+	<!--7.批量插入-->
+	<insert  id="doBatchInsertByList"  parameterType="java.util.List"> 
+		INSERT INTO SYS_RESOURCE(resourceid,resourcename,resourceinfo,parentid,seqno,icon,type,delete_flag,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3)
+		SELECT SYS_GUID() resourceid, A.*
+		FROM ( 
+		<foreach collection="list" item="item" index="index" separator="UNION ALL" >
+		SELECT
+			#{item.resourceid,jdbcType=VARCHAR} resourceid,#{item.resourcename,jdbcType=VARCHAR} resourcename,#{item.resourceinfo,jdbcType=VARCHAR} resourceinfo,#{item.parentid,jdbcType=VARCHAR} parentid,#{item.seqno,jdbcType=DOUBLE} seqno,#{item.icon,jdbcType=VARCHAR} icon,#{item.type,jdbcType=VARCHAR} type,'N' delete_flag,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,#{item.alterId,jdbcType=VARCHAR} alter_id,#{item.alterName,jdbcType=VARCHAR} alter_name,SYSDATE alter_time,#{item.reserve1,jdbcType=VARCHAR} reserve1,#{item.reserve2,jdbcType=VARCHAR} reserve2,#{item.reserve3,jdbcType=DATE} reserve3
+		FROM DUAL
+		</foreach>
+		) A
+	</insert>
+
+	<!--8.按主键逻辑删除-->
+	<update id="doDeleteById"  parameterType="String"> 
+		UPDATE  SYS_RESOURCE t SET t.DELETE_FLAG = 'Y'  WHERE 1=1   AND t.resourceid = #{value}
+	</update>
+
+	<!--9.按复合条件逻辑更新-->
+	<update  id="doUpdateByVO"  parameterType="ResourceVO"> 
+		UPDATE   SYS_RESOURCE  
+		<set>
+			<if test="resourceid != null">resourceid=#{resourceid},</if>
+			<if test="resourcename != null">resourcename=#{resourcename},</if>
+			<if test="resourceinfo != null">resourceinfo=#{resourceinfo},</if>
+			<if test="parentid != null">parentid=#{parentid},</if>
+			<if test="seqno != null">seqno=#{seqno},</if>
+			<if test="icon != null">icon=#{icon},</if>
+			<if test="type != null">type=#{type},</if>
+			<if test="deleteFlag != null">delete_flag='N',</if>
+			<if test="createId != null">create_id=#{createId},</if>
+			<if test="createName != null">create_name=#{createName},</if>
+			<if test="createTime != null">create_time=TO_DATE(#{createTime},'yyyy-MM-dd HH24:mi:ss'),</if>
+			<if test="alterId != null">alter_id=#{alterId},</if>
+			<if test="alterName != null">alter_name=#{alterName},</if>
+			<if test="alterTime != null">alter_time=TO_DATE(TO_CHAR(SYSDATE,'yyyy-MM-dd HH24:mi:ss'),'yyyy-MM-dd HH24:mi:ss'),</if>
+			<if test="reserve1 != null">reserve1=#{reserve1},</if>
+			<if test="reserve2 != null">reserve2=#{reserve2},</if>
+			<if test="reserve3 != null">reserve3=TO_DATE(#{reserve3},'yyyy-MM-dd HH24:mi:ss')</if>
+		</set>
+		WHERE  resourceid = #{resourceid}
+	</update>
+
+	<!--10.批量修改-->
+	<update id="doBatchUpdateByList"  parameterType="java.util.List">
+		INSERT INTO SYS_RESOURCE(resourceid,resourcename,resourceinfo,parentid,seqno,icon,type,delete_flag,create_id,create_name,create_time,alter_id,alter_name,alter_time,reserve1,reserve2,reserve3)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator="," >
+			#{item.resourceid,jdbcType=VARCHAR} resourceid,#{item.resourcename,jdbcType=VARCHAR} resourcename,#{item.resourceinfo,jdbcType=VARCHAR} resourceinfo,#{item.parentid,jdbcType=VARCHAR} parentid,#{item.seqno,jdbcType=DOUBLE} seqno,#{item.icon,jdbcType=VARCHAR} icon,#{item.type,jdbcType=VARCHAR} type,'N' delete_flag,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,#{item.alterId,jdbcType=VARCHAR} alter_id,#{item.alterName,jdbcType=VARCHAR} alter_name,SYSDATE alter_time,#{item.reserve1,jdbcType=VARCHAR} reserve1,#{item.reserve2,jdbcType=VARCHAR} reserve2,#{item.reserve3,jdbcType=DATE} reserve3
+		</foreach>
+		ON DUPLICATE KEY UPDATE   
+			resourceid = VALUES(resourceid),
+			resourcename = VALUES(resourcename),
+			resourceinfo = VALUES(resourceinfo),
+			parentid = VALUES(parentid),
+			seqno = VALUES(seqno),
+			icon = VALUES(icon),
+			type = VALUES(type),
+			delete_flag = VALUES(delete_flag),
+			create_id = VALUES(create_id),
+			create_name = VALUES(create_name),
+			create_time = VALUES(create_time),
+			alter_id = VALUES(alter_id),
+			alter_name = VALUES(alter_name),
+			alter_time = VALUES(alter_time),
+			reserve1 = VALUES(reserve1),
+			reserve2 = VALUES(reserve2),
+			reserve3 = VALUES(reserve3)
+	</update>
+
+	<!--11.根据对象查询记录-->
+	<select id="doFindByVO" parameterType="ResourceVO"  resultType="ResourceVO">  
+		SELECT 
+		<include refid="SQL_CONTENT"/>
+		FROM SYS_RESOURCE t 
+		WHERE t.DELETE_FLAG = 'N' 
+		<include refid="SQL_CONDITION"/>
+	</select>
+
+	<!--12.根据资源获取其资源及权限-->
+	<resultMap id="ResourcePermissionMap" type="com.syfri.userservice.model.ResourceVO">
+		<id property="resourceid" column="resourceid"/>
+		<result property="resourcename" column="resourcename"/>
+		<result property="resourceinfo" column="resourceinfo"/>
+		<result property="parentid" column="parentid"/>
+		<result property="seqno" column="seqno"/>
+		<result property="icon" column="icon"/>
+		<result property="type" column="type"/>
+		<result property="createName" column="create_name"/>
+		<result property="createTime" column="create_time"/>
+		<result property="alterName" column="alter_name"/>
+		<result property="alterTime" column="alter_time"/>
+		<collection property="permissions" ofType="com.syfri.userservice.model.PermissionVO">
+			<id property="permissionid" column="permissionid"/>
+			<result property="permissionname" column="permissionname"/>
+			<result property="permissioninfo" column="permissioninfo"/>
+		</collection>
+	</resultMap>
+	<select id="doFindResourcePermissions" parameterType="RoleVO"  resultMap="ResourcePermissionMap">
+		SELECT
+		<include refid="SQL_CONTENT"/>
+		,r.permissionid
+		,r.permissionname
+		,r.permissioninfo
+		FROM SYS_RESOURCE t
+		LEFT JOIN (SELECT c.resourceid,r.permissionid,r.permissionname,r.permissioninfo from SYS_RESOURCE_PERMISSION c
+				INNER JOIN SYS_PERMISSION r ON r.permissionid = c.permissionid
+				WHERE (r.DELETE_FLAG = 'N' OR r.DELETE_FLAG IS NULL)
+				) r
+		ON t.resourceid = r.resourceid
+
+		WHERE t.DELETE_FLAG = 'N'
+		<include refid="SQL_CONDITION"/>
+		ORDER BY t.create_time DESC
+	</select>
+
+	<!--13.新增资源时批量插入用权限（中间表）-->
+	<insert  id="doInsertResourcePermissionsBatch"  parameterType="java.util.List">
+		INSERT INTO SYS_RESOURCE_PERMISSION(pkid,resourceid,permissionid,create_id,create_name,create_time,delete_flag)
+		SELECT SYS_GUID() pkid, A.*
+		FROM (
+		<foreach collection="list" item="item" index="index" separator="UNION ALL" >
+			SELECT
+			#{item.resourceid,jdbcType=VARCHAR} resourceid,#{item.permissionid,jdbcType=VARCHAR} permissionid,#{item.createId,jdbcType=VARCHAR} create_id,#{item.createName,jdbcType=VARCHAR} create_name,SYSDATE create_time,'N' delete_flag
+			FROM DUAL
+		</foreach>
+		) A
+	</insert>
+
+	<!--14.修改资源时先删除资源权限（中间表）-->
+	<delete id="doDeleteResourcePermissions" parameterType="String">
+		DELETE FROM SYS_RESOURCE_PERMISSION WHERE resourceid = #{value}
+	</delete>
+
+	<!--15.删除资源时删除资源权限-->
+	<update id="doDeleteResourcePermissionsBatch"  parameterType="String">
+		UPDATE SYS_RESOURCE_PERMISSION t SET t.DELETE_FLAG = 'Y' WHERE 1=1 AND t.resourceid = #{value}
+	</update>
+
+	<!--16.根据角色列表查询资源-->
+	<select id="doFindResourceByRoleList" parameterType="java.util.List" resultType="ResourceVO">
+		SELECT DISTINCT r.resourceid,r.resourcename FROM SYS_ROLE_RESOURCE c
+		LEFT JOIN SYS_RESOURCE r ON c.resourceid = r.resourceid
+		WHERE c.delete_flag = 'N' AND r.delete_flag = 'N'
+		AND ROLEID IN
+		<foreach collection="list" item="item" index="index" open="(" close=")" separator="," >
+			#{item.roleid,jdbcType=VARCHAR}
+		</foreach>
+	</select>
+
+	<!--17.根据角色列表，父节点获取资源列表-->
+	<select id="doFindResourceByParentId" parameterType="java.util.Map" resultType="ResourceVO">
+		SELECT DISTINCT r.resourceid,r.resourcename,r.resourceinfo,r.parentid,r.seqno,r.icon
+		FROM SYS_RESOURCE r
+		INNER JOIN SYS_ROLE_RESOURCE c ON r.resourceid = c.resourceid
+		WHERE r.delete_flag = 'N'
+		AND roleid IN
+		<foreach collection="roleList" item="item" index="index" open="(" close=")" separator="," >
+			#{item.roleid,jdbcType=VARCHAR}
+		</foreach>
+		<if test="parentid!=null">
+			AND parentid = #{parentid}
+		</if>
+		ORDER BY seqno
+	</select>
+
+</mapper>
